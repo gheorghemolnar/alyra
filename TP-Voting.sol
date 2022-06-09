@@ -27,8 +27,8 @@ contract Voting is Ownable{
     uint nonce = 0;
     mapping (address => Voter)  voterslist;
     mapping (uint => Proposal)  proposalslist;
-    WorkflowStatus              votingStatus = WorkflowStatus.RegisteringVoters;
-    uint                        winningProposalId;
+    WorkflowStatus       public votingStatus = WorkflowStatus.RegisteringVoters;
+    uint                 public winningProposalId;
 
     event VoterRegistered(address voterAddress);
     event WorkflowStatusChange(WorkflowStatus previousStatus, WorkflowStatus newStatus);
@@ -36,7 +36,7 @@ contract Voting is Ownable{
     event Voted (address voter, uint proposalId);
 
     function voterRegistration(address _voter) public onlyOwner () {
-        require(votingStatus == WorkflowStatus.RegisteringVoters);
+        require(votingStatus == WorkflowStatus.RegisteringVoters, "Voter registration no longer available !");
         require(!voterslist[_voter].isRegistered, "Voter already registrerd !");
         Voter memory newVoter = Voter ({isRegistered: true, hasVoted: false, votedProposalId: 0 });
         voterslist[_voter] = newVoter;
@@ -45,7 +45,10 @@ contract Voting is Ownable{
 
     function proposalRegistration(string memory _description) public{
         require(votingStatus == WorkflowStatus.ProposalsRegistrationStarted, "Proposal registration is not possible now.");
-        require(!voterslist[msg.sender].isRegistered, "Only registred voters can submit a proposal.");
+        require(voterslist[msg.sender].isRegistered, "Only registred voters can submit a proposal.");
+        bool duplicateProposition = indexOf(_description) != -1;
+        require(!duplicateProposition, "Proposition already registered !");
+
         nonce++;
         Proposal memory newProposal = Proposal ({ description: _description, voteCount: 0 });
         proposalslist[nonce] = newProposal;
@@ -85,11 +88,11 @@ contract Voting is Ownable{
 
     function voteProposal(uint _proposalId) public {
         require(votingStatus == WorkflowStatus.VotingSessionStarted, "Voting session has not started yet !");
-        require(!voterslist[msg.sender].isRegistered, "Available to registered voters only !");
-        require(!voterslist[msg.sender].hasVoted, "You can only vote once !");
+        require(voterslist[msg.sender].isRegistered, "Available to registered voters only !");
+        require(voterslist[msg.sender].hasVoted == false, "You can only vote once !");
 
-        voterslist[msg.sender].hasVoted == true;
-        voterslist[msg.sender].votedProposalId == _proposalId;
+        voterslist[msg.sender].hasVoted = true;
+        voterslist[msg.sender].votedProposalId = _proposalId;
         proposalslist[_proposalId].voteCount += 1;
 
         emit Voted(msg.sender, _proposalId);
@@ -104,5 +107,14 @@ contract Voting is Ownable{
             }
         }
         return winner;
+    }
+
+    function indexOf(string memory value) private view returns(int){
+        for (uint i = 1; i <= nonce; i++) {
+            if (keccak256(abi.encodePacked(proposalslist[i].description)) == keccak256(abi.encodePacked(value))) {
+                return int(i);
+            }
+        }
+        return -1;
     }
 }
