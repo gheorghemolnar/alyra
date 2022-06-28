@@ -29,19 +29,19 @@ node truffle test test/TP_Voting.test.js
     - should not be able to change the workflow status
 
 # Votes tallying
-## _This section allows to verify that the results can only be known, only after the end of voting process_
+#### _This section allows to verify that the results can only be known, only after the end of voting process_
 
 # Voting process
-## _This section allows to verify that process steps can't be changed arbitrarly_
+#### _This section allows to verify that process steps can't be changed arbitrarly_
 
 # When the proposalId 3, has the most votes
-## _This allow to verify that a proposal, which has the most votes count, should be declared as winner_
+#### _This allow to verify that a proposal, which has the most votes count, should be declared as winner_
 
 # When proposalIds: 2 and 3, have equal number of votes
-## _This allow to verify that if 2 proposals, which have the same number of votes, than the first one should be declared as winner_
+#### _This allow to verify that if 2 proposals, which have the same number of votes, than the first one should be declared as winner_
 
 # Results should look something like this
-
+```
   Contract: TP_Voting
     Newly deployed Contract
       Initialization status
@@ -119,3 +119,4 @@ node truffle test test/TP_Voting.test.js
 ·-------------------------------------------|--------------|-------------|-------------|--------------|-------------·
 
   33 passing (39s)
+```
